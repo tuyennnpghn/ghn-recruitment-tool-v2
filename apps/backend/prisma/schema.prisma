@@ -1,0 +1,280 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email               String             @unique
+  password            String
+  fullName            String             @map("full_name")
+  role                String
+  isActive            Boolean            @default(true) @map("is_active")
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+  activityLogs        ActivityLog[]
+  cvUploads           CandidateCv[]
+  matchedCandidates   CandidateRequest[] @relation("MatchedBy")
+  candidatesCreated   Candidate[]        @relation("CandidateCreator")
+  candidatesAsPic     Candidate[]        @relation("CandidatePic")
+  notificationReads   NotificationRead[]
+  requestsCreated     Request[]          @relation("RequestCreator")
+  requestsAsRecruiter Request[]          @relation("Recruiter")
+  requestsAsShared1   Request[]          @relation("Shared1")
+  requestsAsShared2   Request[]          @relation("Shared2")
+  requestsAsShared3   Request[]          @relation("Shared3")
+
+  @@map("users")
+}
+
+model Department {
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String             @unique
+  name            String
+  createdAt       DateTime           @default(now()) @map("created_at")
+  jobTitles       JobTitle[]
+  requestCounters RequestNoCounter[]
+  requests        Request[]
+
+  @@map("departments")
+}
+
+model JobTitle {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  departmentId String     @map("department_id") @db.Uuid
+  title        String
+  sGrade       String?    @map("s_grade")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  department   Department @relation(fields: [departmentId], references: [id])
+  requests     Request[]
+
+  @@unique([departmentId, title])
+  @@map("job_titles")
+}
+
+model Level {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String    @unique
+  leadTimeDays Int?      @map("lead_time_days")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  requests     Request[]
+
+  @@map("levels")
+}
+
+model Track {
+  id       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name     String    @unique
+  requests Request[]
+
+  @@map("tracks")
+}
+
+model SubTrack {
+  id       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name     String    @unique
+  requests Request[]
+
+  @@map("sub_tracks")
+}
+
+model CvSource {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String      @unique
+  candidates Candidate[]
+
+  @@map("cv_sources")
+}
+
+model HolidayCalendar {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  holidayDate DateTime @unique @map("holiday_date") @db.Date
+  description String
+
+  @@map("holiday_calendar")
+}
+
+model RequestNoCounter {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  departmentId String     @map("department_id") @db.Uuid
+  year         Int        @db.SmallInt
+  lastSequence Int        @default(0) @map("last_sequence")
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  @@unique([departmentId, year])
+  @@map("request_no_counters")
+}
+
+model Request {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  requestNo            String             @unique @map("request_no")
+  codeDept             String             @map("code_dept")
+  openDate             DateTime           @map("open_date") @db.Date
+  departmentId         String             @map("department_id") @db.Uuid
+  section              String?
+  team                 String?
+  jobTitleId           String?            @map("job_title_id") @db.Uuid
+  levelId              String?            @map("level_id") @db.Uuid
+  sGrade               String?            @map("s_grade")
+  trackId              String?            @map("track_id") @db.Uuid
+  subTrackId           String?            @map("sub_track_id") @db.Uuid
+  hiringManager        String?            @map("hiring_manager")
+  recruiterId          String             @map("recruiter_id") @db.Uuid
+  shared1Id            String?            @map("shared_1_id") @db.Uuid
+  shared1Date          DateTime?          @map("shared_1_date")
+  shared2Id            String?            @map("shared_2_id") @db.Uuid
+  shared2Date          DateTime?          @map("shared_2_date")
+  shared3Id            String?            @map("shared_3_id") @db.Uuid
+  shared3Date          DateTime?          @map("shared_3_date")
+  typeOfRecruitment    String             @map("type_of_recruitment")
+  replaceFor           String?            @map("replace_for")
+  status               String             @default("Opening")
+  cddAcceptedOfferDate DateTime?          @map("cdd_accepted_offer_date") @db.Date
+  onboardDate          DateTime?          @map("onboard_date") @db.Date
+  pendingStartDate     DateTime?          @map("pending_start_date")
+  pendingEndDate       DateTime?          @map("pending_end_date") @db.Date
+  pendingDays          Int?               @map("pending_days")
+  pendingReason        String?            @map("pending_reason")
+  closeReason          String?            @map("close_reason")
+  note                 String?
+  isArchived           Boolean            @default(false) @map("is_archived")
+  createdBy            String             @map("created_by") @db.Uuid
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+  candidateRequests    CandidateRequest[]
+  creator              User               @relation("RequestCreator", fields: [createdBy], references: [id])
+  department           Department         @relation(fields: [departmentId], references: [id])
+  jobTitle             JobTitle?          @relation(fields: [jobTitleId], references: [id])
+  level                Level?             @relation(fields: [levelId], references: [id])
+  recruiter            User               @relation("Recruiter", fields: [recruiterId], references: [id])
+  shared1              User?              @relation("Shared1", fields: [shared1Id], references: [id])
+  shared2              User?              @relation("Shared2", fields: [shared2Id], references: [id])
+  shared3              User?              @relation("Shared3", fields: [shared3Id], references: [id])
+  subTrack             SubTrack?          @relation(fields: [subTrackId], references: [id])
+  track                Track?             @relation(fields: [trackId], references: [id])
+
+  @@map("requests")
+}
+
+model Candidate {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullName          String             @map("full_name")
+  email             String?            @unique
+  phone             String?            @unique
+  picId             String             @map("pic_id") @db.Uuid
+  currentCompany    String?            @map("current_company")
+  industry          String?
+  cvLink            String?            @map("cv_link")
+  cvSourceId        String?            @map("cv_source_id") @db.Uuid
+  isBlacklisted     Boolean            @default(false) @map("is_blacklisted")
+  blacklistReason   String?            @map("blacklist_reason")
+  currentSalary     Decimal?           @map("current_salary")
+  expectedSalary    Decimal?           @map("expected_salary")
+  salaryNote        String?            @map("salary_note")
+  isArchived        Boolean            @default(false) @map("is_archived")
+  createdBy         String             @map("created_by") @db.Uuid
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  sGrade            String?            @map("s_grade")
+  cvs               CandidateCv[]
+  candidateRequests CandidateRequest[]
+  creator           User               @relation("CandidateCreator", fields: [createdBy], references: [id])
+  cvSource          CvSource?          @relation(fields: [cvSourceId], references: [id])
+  pic               User               @relation("CandidatePic", fields: [picId], references: [id])
+
+  @@map("candidates")
+}
+
+model CandidateCv {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  candidateId   String    @map("candidate_id") @db.Uuid
+  filePath      String    @map("file_path")
+  fileName      String    @map("file_name")
+  fileSizeBytes Int       @map("file_size_bytes")
+  fileType      String    @map("file_type")
+  versionNumber Int       @map("version_number")
+  uploadedBy    String    @map("uploaded_by") @db.Uuid
+  uploadedAt    DateTime  @default(now()) @map("uploaded_at")
+  candidate     Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  uploader      User      @relation(fields: [uploadedBy], references: [id])
+
+  @@map("candidate_cvs")
+}
+
+model CandidateRequest {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  candidateId   String         @map("candidate_id") @db.Uuid
+  requestId     String         @map("request_id") @db.Uuid
+  currentStep   Int            @default(1) @map("current_step")
+  overallStatus String?        @map("overall_status")
+  isActive      Boolean        @default(true) @map("is_active")
+  matchedBy     String         @map("matched_by") @db.Uuid
+  matchedAt     DateTime       @default(now()) @map("matched_at")
+  candidate     Candidate      @relation(fields: [candidateId], references: [id])
+  matchedByUser User           @relation("MatchedBy", fields: [matchedBy], references: [id])
+  request       Request        @relation(fields: [requestId], references: [id])
+  pipelineSteps PipelineStep[]
+
+  @@unique([candidateId, requestId])
+  @@map("candidate_requests")
+}
+
+model PipelineStep {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  candidateRequestId String           @map("candidate_request_id") @db.Uuid
+  stepNumber         Int              @map("step_number")
+  stepName           String           @map("step_name")
+  stepDate           DateTime?        @map("step_date")
+  stepResult         String?          @map("step_result")
+  stepNote           String?          @map("step_note")
+  updatedBy          String?          @map("updated_by") @db.Uuid
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  candidateRequest   CandidateRequest @relation(fields: [candidateRequestId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateRequestId, stepNumber])
+  @@map("pipeline_steps")
+}
+
+model ActivityLog {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  action      String
+  changesJson Json?    @map("changes_json")
+  createdAt   DateTime @default(now()) @map("created_at")
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("activity_logs")
+}
+
+model Notification {
+  id            String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type          String
+  title         String
+  body          String
+  recipientRole String?            @map("recipient_role")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  reads         NotificationRead[]
+
+  @@map("notifications")
+}
+
+model NotificationRead {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  notificationId String       @map("notification_id") @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  readAt         DateTime     @default(now()) @map("read_at")
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, userId])
+  @@map("notification_reads")
+}

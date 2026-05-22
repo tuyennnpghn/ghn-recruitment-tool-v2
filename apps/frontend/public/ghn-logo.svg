@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" fill="none">
+  <!-- Package icon box background -->
+  <rect x="4" y="10" width="76" height="76" rx="14" fill="url(#boxGrad)"/>
+  <!-- Package flap top -->
+  <path d="M4 28 Q42 10 80 28" fill="url(#flapGrad)"/>
+  <!-- GHN text on box -->
+  <text x="42" y="72" text-anchor="middle" font-family="Arial Black, Arial" font-weight="900" font-size="22" fill="white" letter-spacing="-0.5">GHN</text>
+  <!-- Arrow / rocket on box -->
+  <polygon points="42,14 37,26 42,22 47,26" fill="white" opacity="0.9"/>
+
+  <!-- GiaoHangNhanh text -->
+  <text x="96" y="52" font-family="Arial, sans-serif" font-weight="900" font-size="32" fill="#FF5200" letter-spacing="-0.5">GiaoHangNhanh</text>
+  <!-- Tagline -->
+  <text x="96" y="76" font-family="Arial, sans-serif" font-weight="700" font-size="16" fill="#006FAD">Giao Siêu Nhanh, Giá Siêu Tốt</text>
+
+  <defs>
+    <linearGradient id="boxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF7A00"/>
+      <stop offset="100%" stop-color="#FF5200"/>
+    </linearGradient>
+    <linearGradient id="flapGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#FF7A00"/>
+    </linearGradient>
+  </defs>
+</svg>

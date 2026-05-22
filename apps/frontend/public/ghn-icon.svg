@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect x="0" y="0" width="64" height="64" rx="12" fill="url(#g1)"/>
+  <!-- Flap -->
+  <path d="M4 20 Q32 6 60 20" fill="url(#g2)"/>
+  <!-- GHN -->
+  <text x="32" y="52" text-anchor="middle" font-family="Arial Black, Arial" font-weight="900" font-size="18" fill="white" letter-spacing="-0.5">GHN</text>
+  <!-- Arrow up -->
+  <polygon points="32,8 27,19 32,15 37,19" fill="white" opacity="0.95"/>
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF7A00"/>
+      <stop offset="100%" stop-color="#FF5200"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFAA40"/>
+      <stop offset="100%" stop-color="#FF7A00"/>
+    </linearGradient>
+  </defs>
+</svg>

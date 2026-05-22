@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build:frontend && npx prisma generate --schema=apps/backend/prisma/schema.prisma && npx prisma migrate deploy --schema=apps/backend/prisma/schema.prisma",
+  "outputDirectory": "apps/frontend/dist",
+  "functions": {
+    "api/index.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.ts" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
