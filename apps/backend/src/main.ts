@@ -24,9 +24,19 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
-  console.log(
-    `🚀 Backend running on http://localhost:${process.env.PORT ?? 3000}/api/v1`,
-  );
+  // 🛠️ CẤU HÌNH PORT & HOST ĐỂ CHẠY TRÊN CLOUD (RENDER)
+  const port = parseInt(process.env.PORT ?? '3000', 10);
+  
+  // Ép NestJS bind vào host '0.0.0.0' thay vì ngầm định localhost
+  await app.listen(port, '0.0.0.0');
+  
+  console.log(`🚀 Backend running on port ${port} via 0.0.0.0`);
+  console.log(`🌍 API Base Path: http://0.0.0.0:${port}/api/v1`);
 }
-bootstrap();
+
+// 🟢 BỘ BỌC LỖI TOÀN CỤC: Nếu sập vì lỗi Database/Prisma lúc khởi động, 
+// nó sẽ ép hệ thống in sạch log lỗi ra màn hình Render thay vì im lặng chết.
+bootstrap().catch((err) => {
+  console.error('🔥 CRITICAL BOOTSTRAP ERROR DURING STARTUP:', err);
+  process.exit(1);
+});
