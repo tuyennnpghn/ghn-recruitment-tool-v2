@@ -18,10 +18,22 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import { candidateService } from "@/lib/services"
 import type { CandidateDetail, CandidatePipelineItem } from "@/types/api"
 import { getResultBadgeColor } from "@/components/update-result-drawer"
 import { cn } from "@/lib/utils"
+
+// ─── Constants ─────────────────────────────────────────────────────────────
+
+const S_GRADES = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"]
+
+const INDUSTRIES = [
+  "Technology", "E-commerce", "Fintech", "Telecom", "Logistics",
+  "Manufacturing", "Conglomerate", "Ride-hailing", "Retail", "FMCG", "Other",
+]
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -90,11 +102,25 @@ export default function CandidateDetailPage() {
   const [saving, setSaving] = useState(false)
   const [editForm, setEditForm] = useState<Record<string, string>>({})
 
+  // CV Sources for dropdown
+  const [cvSources, setCvSources] = useState<Array<{ id: string; name: string }>>([])
+
   useEffect(() => {
     if (!id) return
     setLoading(true)
-    candidateService.get(id)
-      .then((data) => {
+
+    // Load candidate data and cv sources in parallel
+    Promise.all([
+      candidateService.get(id),
+      fetch(`${import.meta.env.VITE_API_BASE_URL}/candidates/meta/cv-sources`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("ghn_token")}`,
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      }).then((r) => r.json()),
+    ])
+      .then(([data, sourcesData]) => {
         setCandidate(data)
         setEditForm({
           fullName: data.fullName ?? "",
@@ -109,7 +135,12 @@ export default function CandidateDetailPage() {
           salaryNote: (data as any).salaryNote ?? "",
           isBlacklisted: data.isBlacklisted ? "true" : "false",
           blacklistReason: data.blacklistReason ?? "",
+          cvSourceId: (data as any).cvSourceId ?? (data as any).cvSource?.id ?? "",
         })
+        const sources = Array.isArray(sourcesData)
+          ? sourcesData
+          : (sourcesData?.items ?? [])
+        setCvSources(sources)
       })
       .catch((e) => setError(e?.response?.data?.message || "Không tải được hồ sơ ứng viên"))
       .finally(() => setLoading(false))
@@ -147,6 +178,7 @@ export default function CandidateDetailPage() {
         expectedSalary: editForm.expectedSalary || undefined,
         salaryNote: editForm.salaryNote || undefined,
         cvLink: editForm.cvLink || undefined,
+        cvSourceId: editForm.cvSourceId || undefined,
         isBlacklisted: editForm.isBlacklisted === "true",
         ...(editForm.isBlacklisted === "true"
           ? { blacklistReason: editForm.blacklistReason || undefined }
@@ -182,7 +214,6 @@ export default function CandidateDetailPage() {
 
   const initials = (candidate.fullName ?? "?").split(" ").filter(Boolean).map((n: string) => n[0]).slice(-2).join("")
   const picInitials = ((candidate as any).pic?.fullName ?? "?").split(" ").filter(Boolean).map((n: string) => n[0]).slice(-2).join("")
-  // Backend returns matchedRequests
   const matchedRequests = (candidate.matchedRequests ?? []) as CandidatePipelineItem[]
   const currentStageForMatch = (m: any) => m?.currentStage ?? m?.pipelineSteps?.slice(-1)?.[0]?.stepName ?? "Successfully Approached"
   const currentResultForMatch = (m: any) => m?.overallStatus ?? null
@@ -445,12 +476,45 @@ export default function CandidateDetailPage() {
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Industry</Label>
-                    <Input value={editForm.industry} onChange={(e) => setEditForm(f => ({ ...f, industry: e.target.value }))} className="h-9 text-sm" />
+                    <Select value={editForm.industry} onValueChange={(v) => setEditForm(f => ({ ...f, industry: v }))}>
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Select industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {INDUSTRIES.map((i) => (
+                          <SelectItem key={i} value={i}>{i}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">S-Grade</Label>
-                  <Input value={editForm.sGrade} onChange={(e) => setEditForm(f => ({ ...f, sGrade: e.target.value }))} className="h-9 text-sm" placeholder="S1–S8" />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Source</Label>
+                    <Select value={editForm.cvSourceId} onValueChange={(v) => setEditForm(f => ({ ...f, cvSourceId: v }))}>
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Select source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cvSources.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">S-Grade</Label>
+                    <Select value={editForm.sGrade} onValueChange={(v) => setEditForm(f => ({ ...f, sGrade: v }))}>
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Select grade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {S_GRADES.map((g) => (
+                          <SelectItem key={g} value={g}>{g}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
