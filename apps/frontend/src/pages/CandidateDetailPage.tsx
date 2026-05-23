@@ -444,7 +444,7 @@ export default function CandidateDetailPage() {
 
         {/* Edit Drawer */}
         <Sheet open={editDrawerOpen} onOpenChange={setEditDrawerOpen}>
-          <SheetContent side="right" className="w-[420px] p-0 flex flex-col h-[90vh]">
+          <SheetContent side="right" className="w-[420px] p-0 flex flex-col overflow-hidden">
             <SheetHeader className="px-5 py-4 border-b border-border">
               <div className="flex items-center justify-between">
                 <SheetTitle className="text-base font-semibold">Edit Candidate</SheetTitle>
