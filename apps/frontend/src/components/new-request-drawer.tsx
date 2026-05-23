@@ -80,7 +80,41 @@ function FormField({
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
+// ─── Exports for share-request-drawer ──────────────────────────────
 
+export const hrbpList: { name: string; initials: string }[] = []
+
+export const avatarColors = [
+  "bg-primary text-primary-foreground",
+  "bg-secondary text-secondary-foreground",
+  "bg-chart-3 text-primary-foreground",
+]
+
+export function HrbpShareSelect({
+  selected,
+  onSelect,
+  onRemove,
+}: {
+  selected: { name: string; initials: string }[]
+  onSelect: (hrbp: { name: string; initials: string }) => void
+  onRemove: (name: string) => void
+}) {
+  return (
+    <div className="space-y-2">
+      {selected.map((h) => (
+        <div key={h.name} className="flex items-center gap-2 rounded-md border border-border bg-muted/40 px-2.5 py-1.5">
+          <span className="text-xs font-medium text-foreground flex-1">{h.name}</span>
+          <button type="button" onClick={() => onRemove(h.name)} className="text-muted-foreground hover:text-foreground">
+            <span className="text-xs">×</span>
+          </button>
+        </div>
+      ))}
+      {selected.length < 3 && (
+        <p className="text-xs text-muted-foreground">Dùng dropdown Shared by 1/2/3 trong form để thêm HRBP</p>
+      )}
+    </div>
+  )
+}
 export function NewRequestDrawer({
   open,
   onOpenChange,
