@@ -228,7 +228,7 @@ export function NewRequestDrawer({
   }
 
   // ── Submit ──
-  const handleSubmit = async (isDraft = false) => {
+  const handleSubmit = async () => {
     setError(null)
     if (!form.departmentId)  { setError('Vui lòng chọn Department');  return }
     if (!form.recruiterId)   { setError('Vui lòng chọn Recruiter');   return }
@@ -254,8 +254,6 @@ export function NewRequestDrawer({
       if (form.typeOfRecruitment === 'Replacement' && form.replaceFor)
         payload.replaceFor = form.replaceFor
       if (form.note) payload.note = form.note
-      if (isDraft)   payload.status = 'Draft'
-
       console.log('[NewRequestDrawer] submit payload:', payload)
       await api.post('/requests', payload)
       console.log('[NewRequestDrawer] success')
@@ -553,18 +551,9 @@ export function NewRequestDrawer({
           </Button>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleSubmit(true)}
-              disabled={submitting}
-            >
-              {submitting && <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />}
-              Save Draft
-            </Button>
-            <Button
               size="sm"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => handleSubmit(false)}
+              onClick={() => handleSubmit()}
               disabled={submitting}
             >
               {submitting && <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />}
