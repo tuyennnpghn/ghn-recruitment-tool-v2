@@ -94,7 +94,7 @@ export default function CreateCandidatePage() {
   // Load HRBPs and CV Sources from API
   useEffect(() => {
         // Load CV Sources
-    fetch("/api/v1/candidates/meta/cv-sources", {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/candidates/meta/cv-sources`, {
   headers: { 
     Authorization: `Bearer ${localStorage.getItem("ghn_token")}`,
     'Cache-Control': 'no-cache',
