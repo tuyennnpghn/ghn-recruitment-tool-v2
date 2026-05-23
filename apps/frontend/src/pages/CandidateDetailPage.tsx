@@ -444,8 +444,8 @@ export default function CandidateDetailPage() {
 
         {/* Edit Drawer */}
         <Sheet open={editDrawerOpen} onOpenChange={setEditDrawerOpen}>
-          <SheetContent side="right" className="w-[420px] p-0 flex flex-col overflow-hidden">
-            <SheetHeader className="px-5 py-4 border-b border-border">
+          <SheetContent side="right" className="w-[420px] p-0 flex flex-col max-h-screen">
+            <SheetHeader className="px-5 py-3 border-b border-border">
               <div className="flex items-center justify-between">
                 <SheetTitle className="text-base font-semibold">Edit Candidate</SheetTitle>
                 <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setEditDrawerOpen(false)}>
@@ -552,7 +552,7 @@ export default function CandidateDetailPage() {
                 )}
               </div>
             </ScrollArea>
-            <div className="border-t border-border p-4 flex items-center justify-end gap-2">
+            <div className="border-t border-border p-3 flex items-center justify-end gap-2">
               <Button variant="outline" size="sm" onClick={() => setEditDrawerOpen(false)}>Cancel</Button>
               <Button size="sm" onClick={handleSaveEdit} disabled={saving}>
                 {saving && <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />}
