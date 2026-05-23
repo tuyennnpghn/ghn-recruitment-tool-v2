@@ -83,7 +83,6 @@ export default function CreateCandidatePage() {
   const [dragActive, setDragActive] = useState(false)
 
   // ── Lookup data from API ──
-  const [hrbpUsers, setHrbpUsers] = useState<Array<{ id: string; fullName: string }>>([])
   const [cvSources, setCvSources] = useState<Array<{ id: string; name: string }>>([])
   const [loadingLookups, setLoadingLookups] = useState(true)
 
@@ -94,20 +93,7 @@ export default function CreateCandidatePage() {
 
   // Load HRBPs and CV Sources from API
   useEffect(() => {
-    // Load HRBP users
-    fetch("/api/v1/auth/users", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("ghn_token")}` },
-    })
-      .then((r) => r.json())
-      .then((data: unknown) => {
-        const arr: AuthUser[] = Array.isArray(data)
-          ? (data as AuthUser[])
-          : ((data as { items?: AuthUser[] }).items ?? [])
-        setHrbpUsers(arr.filter((u) => u.isActive !== false))
-      })
-      .catch(() => {})
-
-    // Load CV Sources
+        // Load CV Sources
     fetch("/api/v1/candidates/meta/cv-sources", {
       headers: { Authorization: `Bearer ${localStorage.getItem("ghn_token")}` },
     })
@@ -150,8 +136,7 @@ export default function CreateCandidatePage() {
   function validate() {
     const errs: Record<string, string> = {}
     if (!form.fullName.trim()) errs.fullName = "Bắt buộc nhập họ tên"
-    if (!form.picId) errs.picId = "Bắt buộc chọn HRBP"
-    if (!form.email.trim() && !form.phone.trim()) {
+        if (!form.email.trim() && !form.phone.trim()) {
       errs.email = "Bắt buộc có ít nhất Email hoặc SĐT"
       errs.phone = "Bắt buộc có ít nhất Email hoặc SĐT"
     }
@@ -235,7 +220,7 @@ export default function CreateCandidatePage() {
           <CardTitle className="text-sm font-semibold">Personal Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <FormField label="Full Name" required error={errors.fullName}>
               <Input
                 value={form.fullName}
@@ -244,18 +229,7 @@ export default function CreateCandidatePage() {
                 className="h-9"
               />
             </FormField>
-            <FormField label="HRBP in Charge" required error={errors.picId}>
-              <Select value={form.picId} onValueChange={(v) => set("picId", v)}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder={loadingLookups ? "Loading..." : "Select PIC"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {hrbpUsers.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>{u.fullName}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
+            
           </div>
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Email" error={errors.email}>
