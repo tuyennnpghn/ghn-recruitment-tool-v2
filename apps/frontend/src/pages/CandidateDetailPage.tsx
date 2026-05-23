@@ -444,7 +444,7 @@ export default function CandidateDetailPage() {
 
         {/* Edit Drawer */}
         <Sheet open={editDrawerOpen} onOpenChange={setEditDrawerOpen}>
-          <SheetContent side="right" className="w-[420px] p-0 flex flex-col">
+          <SheetContent side="right" className="w-[420px] p-0 flex flex-col h-[90vh]">
             <SheetHeader className="px-5 py-4 border-b border-border">
               <div className="flex items-center justify-between">
                 <SheetTitle className="text-base font-semibold">Edit Candidate</SheetTitle>
@@ -454,7 +454,7 @@ export default function CandidateDetailPage() {
               </div>
             </SheetHeader>
             <ScrollArea className="flex-1">
-              <div className="p-5 space-y-4">
+             <div className="p-4 space-y-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">Full Name</Label>
                   <Input value={editForm.fullName} onChange={(e) => setEditForm(f => ({ ...f, fullName: e.target.value }))} className="h-9 text-sm" />
