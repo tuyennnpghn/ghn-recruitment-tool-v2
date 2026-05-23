@@ -95,8 +95,12 @@ export default function CreateCandidatePage() {
   useEffect(() => {
         // Load CV Sources
     fetch("/api/v1/candidates/meta/cv-sources", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("ghn_token")}` },
-    })
+  headers: { 
+    Authorization: `Bearer ${localStorage.getItem("ghn_token")}`,
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+  },
+})
       .then((r) => r.json())
       .then((data: unknown) => {
         const sources: Array<{ id: string; name: string }> = Array.isArray(data)
