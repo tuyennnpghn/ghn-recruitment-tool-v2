@@ -11,12 +11,22 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     PrismaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
-      useFactory: () => ({
-        secret: process.env.JWT_SECRET || 'fallback-secret',
-        signOptions: {
-          expiresIn: (process.env.JWT_EXPIRES_IN || '8h') as any,
-        },
-      }),
+      useFactory: () => {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+          // Security rule: Never hardcode secrets — fail fast if missing
+          throw new Error(
+            'JWT_SECRET environment variable is not set. ' +
+              'Set it in your .env file before starting the application.',
+          );
+        }
+        return {
+          secret,
+          signOptions: {
+            expiresIn: (process.env.JWT_EXPIRES_IN || '8h') as any,
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

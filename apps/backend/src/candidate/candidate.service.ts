@@ -3,6 +3,7 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCandidateDto } from './dto/create-candidate.dto';
@@ -32,6 +33,7 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
 @Injectable()
 export class CandidateService {
   private supabase;
+  private readonly logger = new Logger(CandidateService.name);
 
   constructor(private prisma: PrismaService) {
     this.supabase = createClient(
@@ -360,7 +362,13 @@ export class CandidateService {
       });
 
     if (error) {
-      throw new BadRequestException(`Upload thất bại: ${error.message}`);
+      // Log internal Supabase error details server-side only — never expose to client
+      this.logger.error(
+        `Supabase upload failed for candidate ${candidateId}: ${error.message}`,
+      );
+      throw new BadRequestException(
+        'Upload CV thất bại. Vui lòng thử lại hoặc liên hệ Admin.',
+      );
     }
 
     const cv = await this.prisma.candidateCv.create({
@@ -398,10 +406,15 @@ export class CandidateService {
     const { data, error } = await this.supabase.storage
       .from(process.env.SUPABASE_CV_BUCKET!)
       .createSignedUrl(filePath, 60 * 60); // 1 hour
-    if (error)
-      throw new BadRequestException(
-        `Không tạo được signed URL: ${error.message}`,
+    if (error) {
+      // Log internal Supabase error server-side only — never expose to client
+      this.logger.error(
+        `Supabase signed URL creation failed for path ${filePath}: ${error.message}`,
       );
+      throw new BadRequestException(
+        'Không thể tạo link tải CV. Vui lòng thử lại hoặc liên hệ Admin.',
+      );
+    }
     return data.signedUrl;
   }
 
