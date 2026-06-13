@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { Request, Response } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -46,6 +47,12 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('api/v1');
+
+  // ── Health Check (public, no auth) ───────────────────────────────────────
+  // Used by UptimeRobot / monitoring services to keep the service alive
+  app.use('/health', (_req: Request, res: Response) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
 
   // ── CORS ─────────────────────────────────────────────────────────────────
   // CORS_ORIGIN can be a comma-separated list of allowed origins, e.g.:
